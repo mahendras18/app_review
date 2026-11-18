@@ -1,5 +1,6 @@
 import logging
 import os
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,10 +13,22 @@ logging.basicConfig(
 )
 logger = logging.getLogger("app_review_backend")
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        from backend.services.temp_report_service import cleanup_expired_reports, _ensure_data_dir
+        storage_dir = _ensure_data_dir()
+        logger.info(f"Initialized Excel report storage at: {storage_dir}")
+        cleanup_expired_reports()
+    except Exception as e:
+        logger.warning(f"Startup storage initialization warning: {e}")
+    yield
+
 app = FastAPI(
     title="Unified App Store Review Analytics API",
     description="Backend API for fetching ratings and user reviews from Google Play Store and Apple App Store.",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Configure CORS
@@ -47,6 +60,6 @@ def root():
 
 if __name__ == "__main__":
     import uvicorn
-    host = os.getenv("HOST", "127.0.0.1")
+    host = os.getenv("HOST", "0.0.0.0" if os.getenv("RENDER") else "127.0.0.1")
     port = int(os.getenv("PORT", "8000"))
     uvicorn.run("backend.main:app", host=host, port=port, reload=True)

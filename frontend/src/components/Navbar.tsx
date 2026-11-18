@@ -101,7 +101,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 />
                 <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-1.5 overflow-hidden animate-fade-in">
                   <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                    Quick Sample Apps
+                    Supported App
                   </div>
                   {PRESET_APPS.map((preset) => (
                     <button
@@ -118,11 +118,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <span>{COUNTRIES.find((c) => c.code === preset.country)?.flag}</span>
                         <span>{preset.name}</span>
                       </div>
-                      {preset.name === 'boAt Hearables' && (
-                        <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">
-                          Default
-                        </span>
-                      )}
+                      <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-mono">
+                        Active
+                      </span>
                     </button>
                   ))}
                 </div>

@@ -268,14 +268,14 @@ export const RatingComparison: React.FC<RatingComparisonProps> = ({
             <div className="text-[11px] text-slate-500 flex items-center justify-between mt-1">
               <span>Fetched Sample:</span>
               <span className="font-semibold text-slate-700">
-                {appleSummary?.reviews_fetched || 0} reviews
+                {googleSummary?.reviews_fetched || 0} reviews
               </span>
             </div>
           </div>
 
           {/* Clarification Note requirement */}
           <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-500 leading-relaxed">
-            <span className="font-semibold text-slate-700">Measurement Integrity:</span> Overall ratings shown here reflect the entire historical store averages reported by Google and Apple APIs, not a localized average of the 30 fetched recent reviews.
+            <span className="font-semibold text-slate-700">Measurement Integrity:</span> Overall ratings shown here reflect the entire historical store averages reported by Google and Apple APIs.
           </div>
         </div>
       </div>

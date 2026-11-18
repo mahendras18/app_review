@@ -71,7 +71,57 @@ class UnifiedDashboardResponse(BaseModel):
     country: str
     timestamp: str
 
+class ReviewReportItem(BaseModel):
+    id: Optional[str] = None
+    platform: str  # "Google Play" | "Apple App Store"
+    app_name: str
+    rating: float
+    sentiment: str  # "Positive" | "Neutral" | "Negative"
+    title: Optional[str] = None
+    text: str
+    date: Optional[str] = None
+    version: Optional[str] = None
+    reviewer_name: Optional[str] = None
+
+class ReviewsReportResponse(BaseModel):
+    platform: str  # "both" | "android" | "ios"
+    app_name: str
+    date_range: str
+    country: str
+    total_count: int
+    android_count: int
+    ios_count: int
+    android_reviews: List[ReviewReportItem] = Field(default_factory=list)
+    ios_reviews: List[ReviewReportItem] = Field(default_factory=list)
+    errors: dict = Field(default_factory=dict)
+
 class HealthResponse(BaseModel):
     status: str
     timestamp: str
     version: str = "1.0.0"
+
+class GeneratedReportItem(BaseModel):
+    id: str
+    filename: str
+    name: str
+    platform: str
+    date_range: str
+    generated_at: str
+    expires_at: str
+    total_count: int
+    android_count: int
+    ios_count: int
+    file_url: str
+    viewer_url: str
+    web_url: str
+    is_public: bool = True
+    is_localhost: bool = False
+    app_name: str = "boAt Hearables"
+
+class GenerateReportRequest(BaseModel):
+    platform: str = "both"
+    date_range: str = "7"
+    country: str = "in"
+    google_id: Optional[str] = "com.boAt.hearables"
+    apple_id: Optional[str] = "1592550875"
+    app_name: Optional[str] = "boAt Hearables"

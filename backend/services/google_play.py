@@ -12,6 +12,7 @@ from google_play_scraper.exceptions import NotFoundError, ExtraHTTPError
 from google_play_scraper.utils.request import get
 
 from backend.schemas.responses import AppSummary, ReviewItem, SearchResultItem
+from backend.services.date_utils import normalize_to_utc, parse_date_range
 
 logger = logging.getLogger(__name__)
 
@@ -146,6 +147,169 @@ def fetch_google_play_reviews(
     except Exception as e:
         logger.error(f"Error fetching Google Play reviews for {clean_id}: {e}")
         return [], f"Failed to retrieve Google Play reviews: {str(e)}"
+
+def fetch_google_play_reviews_by_date(
+    app_id: str,
+    country: str = "in",
+    days: Optional[int] = None,
+    max_total: int = 100_000,
+    max_pages: int = 500,
+) -> Tuple[List[ReviewItem], Optional[str]]:
+    """
+    Fetches customer reviews from Google Play Store filtered by review creation date.
+    Uses pagination with continuation tokens.
+
+    - If `days` is set (e.g. 7, 15, 30): only reviews within that window are returned;
+      pagination stops early when 5 consecutive reviews fall outside the cutoff.
+    - If `days` is None (All Available): fetches all pages until the API returns no more
+      reviews or no continuation token; `max_total` and `max_pages` act as safety caps only.
+
+    Returns (reviews, error_message).
+    """
+    from datetime import timezone, timedelta
+
+    clean_id = extract_google_play_id(app_id)
+    cutoff = datetime.now(timezone.utc) - timedelta(days=days) if days is not None else None
+    fetch_all = days is None
+
+    collected_reviews: List[ReviewItem] = []
+    seen_ids: set = set()
+    continuation_token = None
+    batch_size = 100
+    consecutive_older = 0
+    page_num = 0
+    stop_reason = "unknown"
+
+    logger.info(
+        f"[GooglePlay] Starting review fetch | app={clean_id} | "
+        f"days={days!r} | fetch_all={fetch_all} | "
+        f"max_total={max_total} | max_pages={max_pages}"
+    )
+
+    try:
+        while True:
+            page_num += 1
+
+            result, continuation_token = gp_reviews(
+                clean_id,
+                lang="en",
+                country=country,
+                sort=Sort.NEWEST,
+                count=batch_size,
+                continuation_token=continuation_token,
+            )
+
+            batch_dates = []
+            stop_pagination = False
+            added_in_batch = 0
+
+            if not result:
+                stop_reason = "empty_result"
+                logger.info(
+                    f"[GooglePlay] Page {page_num:4d} | batch=0 | total={len(collected_reviews)} | "
+                    f"stop=empty_result"
+                )
+                break
+
+            for r in result:
+                dt_val = r.get("at")
+                dt_utc = normalize_to_utc(dt_val)
+
+                # Date-window filtering (only when days is set)
+                if cutoff is not None and dt_utc is not None:
+                    if dt_utc < cutoff:
+                        consecutive_older += 1
+                        if consecutive_older >= 5:
+                            stop_pagination = True
+                            stop_reason = "date_cutoff_reached"
+                            break
+                        continue
+                    else:
+                        consecutive_older = 0  # reset on in-range review
+
+                # Duplicate guard
+                rid = str(r.get("reviewId", "")).strip()
+                if rid and rid in seen_ids:
+                    continue
+                if rid:
+                    seen_ids.add(rid)
+
+                date_str = (
+                    dt_val.isoformat()
+                    if isinstance(dt_val, datetime)
+                    else str(dt_val) if dt_val else None
+                )
+                if date_str:
+                    batch_dates.append(date_str)
+
+                collected_reviews.append(
+                    ReviewItem(
+                        id=rid or None,
+                        platform="google",
+                        rating=float(r.get("score", 0)),
+                        title=None,
+                        text=r.get("content") or "",
+                        date=date_str,
+                        version=r.get("reviewCreatedVersion"),
+                        reviewer_name=r.get("userName"),
+                    )
+                )
+                added_in_batch += 1
+
+                # Safety cap: prevent runaway loops
+                if len(collected_reviews) >= max_total:
+                    stop_pagination = True
+                    stop_reason = "max_total_reached"
+                    break
+
+            # Per-page log
+            all_dates = [
+                r.date for r in collected_reviews if r.date
+            ]
+            oldest_date = min(all_dates) if all_dates else "N/A"
+            newest_date = max(all_dates) if all_dates else "N/A"
+            has_token = bool(continuation_token and continuation_token.token)
+            logger.info(
+                f"[GooglePlay] Page {page_num:4d} | batch={added_in_batch:4d} | "
+                f"total={len(collected_reviews):6d} | oldest={oldest_date} | "
+                f"newest={newest_date} | has_next={has_token}"
+            )
+
+            if stop_pagination:
+                break
+
+            # No more pages
+            if not continuation_token or continuation_token.token is None:
+                stop_reason = "no_continuation_token"
+                break
+
+            # Safety page cap
+            if page_num >= max_pages:
+                stop_reason = "max_pages_reached"
+                logger.warning(
+                    f"[GooglePlay] Safety page cap hit ({max_pages} pages). "
+                    f"Stopping with {len(collected_reviews)} reviews."
+                )
+                break
+
+        logger.info(
+            f"[GooglePlay] Pagination complete | stop_reason={stop_reason} | "
+            f"total_pages={page_num} | total_reviews={len(collected_reviews)} | "
+            f"unique_ids={len(seen_ids)}"
+        )
+        return collected_reviews, None
+
+    except NotFoundError:
+        return [], f"App '{clean_id}' was not found on Google Play Store."
+    except Exception as e:
+        logger.error(f"[GooglePlay] Error fetching reviews by date for {clean_id}: {e}")
+        if collected_reviews:
+            logger.info(
+                f"[GooglePlay] Returning {len(collected_reviews)} reviews collected before error."
+            )
+            return collected_reviews, None
+        return [], f"Failed to retrieve Google Play reviews: {str(e)}"
+
 
 def search_google_play_apps(query: str, country: str = "in", limit: int = 10) -> List[SearchResultItem]:
     """

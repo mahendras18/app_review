@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   LayoutDashboard,
-  MessageSquare,
+  FileSpreadsheet,
   Scale,
   Settings,
   Activity,
@@ -11,14 +11,14 @@ import {
 } from 'lucide-react';
 import { AppConfig } from '../types';
 
-export type NavigationTab = 'overview' | 'reviews' | 'comparison' | 'settings';
+export type NavigationTab = 'overview' | 'export' | 'comparison' | 'settings';
 
 interface SidebarProps {
   activeTab: NavigationTab;
   onTabChange: (tab: NavigationTab) => void;
   appConfig: AppConfig;
   backendOnline: boolean;
-  reviewsCount: number;
+  reviewsCount?: number;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -26,7 +26,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onTabChange,
   appConfig,
   backendOnline,
-  reviewsCount,
 }) => {
   const navItems = [
     {
@@ -36,10 +35,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badge: null,
     },
     {
-      id: 'reviews' as NavigationTab,
-      label: 'Recent Reviews',
-      icon: MessageSquare,
-      badge: reviewsCount > 0 ? `${reviewsCount}` : null,
+      id: 'export' as NavigationTab,
+      label: 'Excel Report',
+      icon: FileSpreadsheet,
+      badge: null,
     },
     {
       id: 'comparison' as NavigationTab,

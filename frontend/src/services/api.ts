@@ -1,6 +1,10 @@
 import {
   AppSummary,
+  GeneratedReportItem,
+  GenerateReportPayload,
   ReviewItem,
+  ReviewReportItem,
+  ReviewsReportResponse,
   SearchResponse,
   SingleDashboardResponse,
   UnifiedDashboardResponse,
@@ -92,7 +96,7 @@ export const api = {
     googleId?: string,
     appleId?: string,
     country: string = 'in',
-    count: number = 30,
+    count: number = 0,
     sort: 'newest' | 'oldest' = 'newest'
   ): Promise<UnifiedDashboardResponse> => {
     const params = new URLSearchParams();
@@ -103,5 +107,48 @@ export const api = {
     params.append('sort', sort);
 
     return request<UnifiedDashboardResponse>(`/dashboard/unified?${params.toString()}`);
+  },
+
+  getReviewsReport: async (params: {
+    googleId?: string;
+    appleId?: string;
+    appName?: string;
+    country?: string;
+    dateRange?: string;
+    platform?: string;
+  }): Promise<ReviewsReportResponse> => {
+    const query = new URLSearchParams();
+    if (params.googleId) query.append('google_id', params.googleId);
+    if (params.appleId) query.append('apple_id', params.appleId);
+    if (params.appName) query.append('app_name', params.appName);
+    if (params.country) query.append('country', params.country);
+    query.append('date_range', params.dateRange || '7');
+    query.append('platform', params.platform || 'both');
+
+    return request<ReviewsReportResponse>(`/reviews/report?${query.toString()}`);
+  },
+
+  generateReport: async (payload: GenerateReportPayload): Promise<GeneratedReportItem> => {
+    return request<GeneratedReportItem>('/reports/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  generateOneDriveReport: async (payload: GenerateReportPayload): Promise<GeneratedReportItem> => {
+    return request<GeneratedReportItem>('/reports/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  getReportsHistory: async (): Promise<GeneratedReportItem[]> => {
+    return request<GeneratedReportItem[]>('/reports');
   },
 };

@@ -4,6 +4,9 @@
 
 backend/.env
 backend/.env.*
+backend/data/temp_reports/
+backend/data/*.json
+!backend/data/apple_seeds.json
 
 __pycache__/
 *.pyc

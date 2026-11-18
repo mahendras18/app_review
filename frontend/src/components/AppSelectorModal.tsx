@@ -488,7 +488,7 @@ export const AppSelectorModal: React.FC<AppSelectorModalProps> = ({
           {activeTab === 'presets' && (
             <div className="space-y-4">
               <div className="text-xs text-slate-600">
-                Instantly switch to verified dual-platform applications:
+                Dedicated supported application:
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
