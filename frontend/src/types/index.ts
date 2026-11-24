@@ -51,6 +51,9 @@ export interface GeneratedReportItem {
   is_public: boolean;
   is_localhost: boolean;
   app_name: string;
+  reviews?: ReviewItem[];
+  android_reviews?: ReviewItem[];
+  ios_reviews?: ReviewItem[];
 }
 
 export interface GenerateReportPayload {
@@ -104,6 +107,7 @@ export interface ReviewItem {
   id?: string;
   platform: Platform;
   rating: number;
+  sentiment?: 'Positive' | 'Neutral' | 'Negative' | string;
   title?: string | null;
   text: string;
   date?: string | null;

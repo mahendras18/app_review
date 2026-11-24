@@ -5,6 +5,7 @@ class ReviewItem(BaseModel):
     id: Optional[str] = None
     platform: str  # "google" | "apple"
     rating: float
+    sentiment: Optional[str] = None  # "Positive" | "Neutral" | "Negative"
     title: Optional[str] = None
     text: str
     date: Optional[str] = None
@@ -117,6 +118,9 @@ class GeneratedReportItem(BaseModel):
     is_public: bool = True
     is_localhost: bool = False
     app_name: str = "boAt Hearables"
+    reviews: List[ReviewItem] = Field(default_factory=list)
+    android_reviews: List[ReviewItem] = Field(default_factory=list)
+    ios_reviews: List[ReviewItem] = Field(default_factory=list)
 
 class GenerateReportRequest(BaseModel):
     platform: str = "both"

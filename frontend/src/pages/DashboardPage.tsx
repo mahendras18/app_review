@@ -186,10 +186,10 @@ export const DashboardPage: React.FC = () => {
               <section className="space-y-4">
                 <div>
                   <h2 className="text-base font-bold text-slate-900">
-                    Generate Review Report
+                    Generate Reviews & Excel Report
                   </h2>
                   <p className="text-xs text-slate-500">
-                    Generate a genuine Excel (.xlsx) report for {appConfig.name} and open it directly in Microsoft Excel for the web
+                    Generate and view customer reviews for {appConfig.name} directly on screen, download as an Excel workbook, or open in Microsoft Excel for the web
                   </p>
                 </div>
 
@@ -205,9 +205,9 @@ export const DashboardPage: React.FC = () => {
           {activeTab === 'export' && (
             <div className="space-y-6 animate-fade-in">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Generate Excel Report</h2>
+                <h2 className="text-xl font-bold text-slate-900">Generate Reviews & Excel Report</h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  Generate customer review reports for {appConfig.name} and open directly in Microsoft Excel for the web
+                  Generate customer reviews for {appConfig.name} to view directly on screen, download as an Excel workbook, or open in Microsoft Excel for the web
                 </p>
               </div>
 

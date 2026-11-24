@@ -26,3 +26,63 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* ==========================================================================
+   Microsoft Excel Desktop Spreadsheet Theme Styles (AG Grid Overrides)
+   ========================================================================== */
+.excel-spreadsheet-grid-wrapper.ag-theme-alpine {
+  --ag-header-background-color: #f3f2f1;
+  --ag-header-foreground-color: #24292f;
+  --ag-header-cell-hover-background-color: #eae9e8;
+  --ag-header-cell-moving-background-color: #dedede;
+  --ag-border-color: #d4d4d4;
+  --ag-secondary-border-color: #e5e7eb;
+  --ag-row-border-color: #e5e7eb;
+  --ag-cell-horizontal-border: solid #e5e7eb 1px;
+  --ag-row-hover-color: #f0fdf4;
+  --ag-selected-row-background-color: #e8f5e9;
+  --ag-font-family: inherit;
+  --ag-font-size: 12px;
+  --ag-range-selection-border-color: #107c41;
+  --ag-range-selection-background-color: rgba(16, 124, 65, 0.1);
+}
+
+.excel-spreadsheet-grid-wrapper .ag-header-cell {
+  border-right: 1px solid #d4d4d4 !important;
+  font-weight: 600;
+  font-size: 11px;
+  color: #374151;
+  letter-spacing: 0.01em;
+}
+
+.excel-spreadsheet-grid-wrapper .ag-header-cell:last-child {
+  border-right: none !important;
+}
+
+.excel-spreadsheet-grid-wrapper .ag-cell {
+  border-right: 1px solid #e5e7eb !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.excel-spreadsheet-grid-wrapper .ag-cell-focus:not(.ag-cell-range-selected) {
+  border: 2px solid #107c41 !important;
+  outline: none !important;
+  z-index: 2;
+}
+
+.excel-spreadsheet-grid-wrapper .ag-row-selected {
+  background-color: #e8f5e9 !important;
+}
+
+.excel-spreadsheet-grid-wrapper .excel-row-index-cell {
+  background-color: #f8f9fa !important;
+  border-right: 1px solid #cbd5e1 !important;
+  color: #64748b !important;
+  font-size: 11px;
+  justify-content: center;
+}
+

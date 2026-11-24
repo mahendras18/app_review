@@ -282,6 +282,10 @@ def test_create_report_endpoint(mock_apple, mock_google):
     assert data["total_count"] == 2
     assert data["android_count"] == 1
     assert data["ios_count"] == 1
+    assert len(data["reviews"]) == 2
+    assert len(data["android_reviews"]) == 1
+    assert len(data["ios_reviews"]) == 1
+    assert data["reviews"][0]["id"] in ("gp_101", "ap_201")
     assert "boAt_Hearables" in data["filename"]
     assert data["viewer_url"].startswith("https://view.officeapps.live.com/op/view.aspx?src=")
     assert data["file_url"] in urllib.parse.unquote(data["viewer_url"])

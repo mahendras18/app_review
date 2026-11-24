@@ -151,4 +151,23 @@ export const api = {
   getReportsHistory: async (): Promise<GeneratedReportItem[]> => {
     return request<GeneratedReportItem[]>('/reports');
   },
+
+  getExportUrl: (params: {
+    googleId?: string;
+    appleId?: string;
+    appName?: string;
+    country?: string;
+    dateRange?: string;
+    platform?: string;
+  }): string => {
+    const query = new URLSearchParams();
+    if (params.googleId) query.append('google_id', params.googleId);
+    if (params.appleId) query.append('apple_id', params.appleId);
+    if (params.appName) query.append('app_name', params.appName);
+    if (params.country) query.append('country', params.country);
+    query.append('date_range', params.dateRange || '7');
+    query.append('platform', params.platform || 'both');
+
+    return `${BASE_URL}/reviews/export?${query.toString()}`;
+  },
 };

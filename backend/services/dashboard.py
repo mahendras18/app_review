@@ -245,6 +245,20 @@ def export_app_reviews(
         dt = normalize_to_utc(r.date)
         return dt.timestamp() if dt else 0.0
 
+    def _compute_sentiment(rating: float) -> str:
+        if rating >= 4.0:
+            return "Positive"
+        elif rating == 3.0:
+            return "Neutral"
+        return "Negative"
+
+    for r in google_reviews:
+        if not r.sentiment:
+            r.sentiment = _compute_sentiment(r.rating)
+    for r in apple_reviews:
+        if not r.sentiment:
+            r.sentiment = _compute_sentiment(r.rating)
+
     google_reviews.sort(key=_parse_ts, reverse=True)
     apple_reviews.sort(key=_parse_ts, reverse=True)
 
@@ -360,6 +374,20 @@ def generate_reviews_report(
         dt = normalize_to_utc(r.date)
         return dt.timestamp() if dt else 0.0
 
+    def _compute_sentiment(rating: float) -> str:
+        if rating >= 4.0:
+            return "Positive"
+        elif rating == 3.0:
+            return "Neutral"
+        return "Negative"
+
+    for r in google_reviews:
+        if not r.sentiment:
+            r.sentiment = _compute_sentiment(r.rating)
+    for r in apple_reviews:
+        if not r.sentiment:
+            r.sentiment = _compute_sentiment(r.rating)
+
     google_reviews.sort(key=_parse_ts, reverse=True)
     apple_reviews.sort(key=_parse_ts, reverse=True)
 
@@ -456,8 +484,32 @@ def generate_and_host_report(
         dt = normalize_to_utc(r.date)
         return dt.timestamp() if dt else 0.0
 
+    def _compute_sentiment(rating: float) -> str:
+        if rating >= 4.0:
+            return "Positive"
+        elif rating == 3.0:
+            return "Neutral"
+        return "Negative"
+
+    for r in google_reviews:
+        if not r.sentiment:
+            r.sentiment = _compute_sentiment(r.rating)
+    for r in apple_reviews:
+        if not r.sentiment:
+            r.sentiment = _compute_sentiment(r.rating)
+
     google_reviews.sort(key=_parse_ts, reverse=True)
     apple_reviews.sort(key=_parse_ts, reverse=True)
+
+    # Combine reviews sorted chronologically descending
+    all_reviews: List[ReviewItem] = []
+    if target_platform == "both":
+        all_reviews = list(google_reviews) + list(apple_reviews)
+        all_reviews.sort(key=_parse_ts, reverse=True)
+    elif target_platform == "android":
+        all_reviews = list(google_reviews)
+    else:
+        all_reviews = list(apple_reviews)
 
     total_count = len(google_reviews) + len(apple_reviews)
 
@@ -500,7 +552,10 @@ def generate_and_host_report(
         web_url=meta["web_url"],
         is_public=meta["is_public"],
         is_localhost=meta["is_localhost"],
-        app_name=meta["app_name"]
+        app_name=meta["app_name"],
+        reviews=all_reviews,
+        android_reviews=google_reviews,
+        ios_reviews=apple_reviews
     )
 
 # Backward-compatibility alias
